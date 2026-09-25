@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ĐỀ KIỂM TRA: KIỂM SOÁT AI VÀ TRÁCH NHIỆM CỦA CON NGƯỜI</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        /* Khung nhập thông tin học sinh */
+        .user-info-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e1e8ed;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #444;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        .question-card {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .question-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #e9ecef;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 30px;
+        }
+
+        .btn-submit:hover {
+            background-color: #357abd;
+        }
+
+        /* Styles cho màn hình kết quả */
+        #result-screen {
+            display: none;
+        }
+
+        .score-board {
+            text-align: center;
+            padding: 20px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            color: #1565c0;
+        }
+
+        .student-result-name {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .score-number {
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+
+        .correct-answer {
+            background-color: #d4edda !important;
+            border-color: var(--success-color) !important;
+            font-weight: bold;
+        }
+
+        .wrong-answer {
+            background-color: #f8d7da !important;
+            border-color: var(--error-color) !important;
+        }
+
+        .explanation-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            display: none;
+        }
+        
+        .explanation-box strong {
+            color: #856404;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+            .user-info-card {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ĐỀ KIỂM TRA: KIỂM SOÁT AI VÀ TRÁCH NHIỆM CỦA CON NGƯỜI</h1>
+
+    <!-- MÀN HÌNH LÀM BÀI -->
+    <div id="quiz-screen">
+        <form id="quiz-form">
+            <!-- Khu vực nhập thông tin học sinh -->
+            <div class="user-info-card">
+                <div class="input-group">
+                    <label for="student-name">Họ và tên học sinh: <span style="color:red">*</span></label>
+                    <input type="text" id="student-name" placeholder="Nhập họ và tên của em..." required>
+                </div>
+                <div class="input-group">
+                    <label for="student-class">Lớp: <span style="color:red">*</span></label>
+                    <input type="text" id="student-class" placeholder="VD: 12A1" required>
+                </div>
+            </div>
+
+            <div id="questions-container">
+                <!-- Javascript sẽ render câu hỏi vào đây -->
+            </div>
+            <button type="button" class="btn-submit" onclick="submitQuiz()">NỘP BÀI</button>
+        </form>
+    </div>
+
+    <!-- MÀN HÌNH KẾT QUẢ -->
+    <div id="result-screen">
+        <div class="score-board" id="score-display">
+            <!-- Điểm và tên sẽ được điền bằng JS -->
+        </div>
+        <div id="result-container">
+            <!-- Javascript sẽ render chi tiết kết quả vào đây -->
+        </div>
+        <button type="button" class="btn-submit" onclick="location.reload()">LÀM LẠI BÀI</button>
+    </div>
+</div>
+
+<script>
+    // 1. Dữ liệu đầu vào
+    const quizData = [
+        {
+            id: 1,
+            question: "Trong vòng đời phát triển của một hệ thống AI, giai đoạn nền tảng nào cần con người tham gia đánh giá cẩn thận nhất để tránh việc AI 'học' phải những thành kiến sai lệch?",
+            options: {
+                A: "Kích hoạt nút dừng khẩn cấp.",
+                B: "Kiểm duyệt và chọn lọc dữ liệu đầu vào.",
+                C: "Mở rộng băng thông mạng.",
+                D: "Cài đặt giao diện người dùng."
+            },
+            correct: "B",
+            explanation: "Ở giai đoạn nền tảng của vòng đời AI (chuẩn bị dữ liệu), con người phải kiểm duyệt và chọn lọc để tránh AI học phải thành kiến/thiên lệch ngay từ đầu."
+        },
+        {
+            id: 2,
+            question: "Khi một hệ thống AI đang vận hành trong thực tế (giai đoạn triển khai) và bất ngờ phát sinh lỗi nguy hiểm, tính năng nào thể hiện quyền kiểm soát tối cao của con người?",
+            options: {
+                A: "Nút dừng khẩn cấp (Kill switch).",
+                B: "Tính năng tự động cập nhật phần mềm.",
+                C: "Khả năng tự học lại từ đầu của AI.",
+                D: "Khả năng tự động tăng tốc độ xử lý."
+            },
+            correct: "A",
+            explanation: "Trong giai đoạn triển khai, con người phải luôn có quyền can thiệp, điển hình là tính năng kích hoạt nút dừng khẩn cấp (Kill switch) để ngăn chặn rủi ro."
+        },
+        {
+            id: 3,
+            question: "Đối với các hệ thống AI có rủi ro cao (ví dụ: AI chẩn đoán y khoa, AI hỗ trợ xét xử), điểm can thiệp bắt buộc của con người trước khi hành động diễn ra là gì?",
+            options: {
+                A: "Cho phép AI tự động chẩn đoán và xuất hóa đơn.",
+                B: "Để AI tự quyết định phác đồ điều trị.",
+                C: "Phê duyệt quyết định cuối cùng của AI.",
+                D: "Xóa bỏ dữ liệu hệ thống mỗi ngày."
+            },
+            correct: "C",
+            explanation: "Ở những hệ thống rủi ro cao, AI chỉ được đưa ra khuyến nghị. Điểm kiểm soát cốt lõi là con người phải trực tiếp phê duyệt quyết định cuối cùng."
+        },
+        {
+            id: 4,
+            question: "Theo nguyên tắc cốt lõi về quyền kiểm soát vòng đời AI, khi một quyết định có sự hỗ trợ của AI dẫn đến hậu quả nghiêm trọng, ai/thực thể nào sẽ là người chịu trách nhiệm cuối cùng?",
+            options: {
+                A: "Hệ thống máy chủ lưu trữ AI.",
+                B: "Con người (người phê duyệt hoặc đơn vị sử dụng AI).",
+                C: "Trí tuệ nhân tạo (vì nó đưa ra gợi ý).",
+                D: "Thuật toán mạng nơ-ron nhân tạo."
+            },
+            correct: "B",
+            explanation: "Dù AI có thông minh hay tự động hóa cao đến đâu, nguyên tắc cốt lõi là con người luôn là người chịu trách nhiệm cuối cùng (về mặt đạo đức và pháp lý)."
+        },
+        {
+            id: 5,
+            question: "Hành động nào sau đây KHÔNG phải là một điểm kiểm soát đúng đắn của con người trong vòng đời AI?",
+            options: {
+                A: "Kiểm duyệt chất lượng dữ liệu trước khi huấn luyện.",
+                B: "Đánh giá tính an toàn của thiết kế thuật toán.",
+                C: "Phó mặc 100% việc ra quyết định cho AI để tiết kiệm thời gian.",
+                D: "Liên tục giám sát hệ thống khi đưa vào triển khai thực tế."
+            },
+            correct: "C",
+            explanation: "Việc phó mặc 100% quyết định cho AI đi ngược lại nguyên tắc bảo đảm quyền kiểm soát của con người trong mọi quy trình vòng đời AI."
+        },
+        {
+            id: 6,
+            question: "Theo nguyên tắc phân quyền giữa Người và Máy, phát biểu nào sau đây mô tả đúng nhất vai trò của hệ thống AI?",
+            options: {
+                A: "AI chỉ đóng vai trò phân tích dữ liệu và đưa ra khuyến nghị.",
+                B: "AI có quyền ra quyết định tối cao thay cho con người.",
+                C: "AI chịu trách nhiệm pháp lý cho các sai sót của mình.",
+                D: "AI có nhiệm vụ giải trình bằng lời nói với khách hàng."
+            },
+            correct: "A",
+            explanation: "Theo nguyên tắc phân quyền, AI chỉ làm nhiệm vụ xử lý dữ liệu và đưa ra khuyến nghị/tư vấn; con người mới là người đưa ra quyết định."
+        },
+        {
+            id: 7,
+            question: "'Trách nhiệm giải trình' (Accountability) khi ứng dụng AI được định nghĩa chính xác nhất là gì?",
+            options: {
+                A: "Là việc AI phải tự viết báo cáo dài 10 trang sau mỗi quyết định.",
+                B: "Là bổn phận phải giải thích minh bạch một quyết định và có bằng chứng cụ thể đi kèm.",
+                C: "Là việc con người đùn đẩy lỗi cho hệ thống máy tính.",
+                D: "Là khả năng lưu trữ dữ liệu không giới hạn của AI."
+            },
+            correct: "B",
+            explanation: "Trách nhiệm giải trình là bổn phận phải giải thích minh bạch về một quyết định (có AI hỗ trợ) dựa trên các bằng chứng cụ thể."
+        },
+        {
+            id: 8,
+            question: "Một hệ thống AI của ngân hàng từ chối hồ sơ vay vốn của khách hàng. Để đảm bảo trách nhiệm giải trình, ngân hàng BẮT BUỘC phải làm gì?",
+            options: {
+                A: "Nâng cấp hệ thống AI lên phiên bản mới nhất.",
+                B: "Chặn số điện thoại của khách hàng để tránh rắc rối.",
+                C: "Cung cấp cơ chế cho phép khách hàng khiếu nại và yêu cầu con người xem xét lại.",
+                D: "In thông báo từ chối bằng màu đỏ."
+            },
+            correct: "C",
+            explanation: "Một hệ thống AI có trách nhiệm giải trình phải bao gồm cơ chế khiếu nại, cho phép người dùng phản hồi và yêu cầu con người can thiệp, điều chỉnh."
+        },
+        {
+            id: 9,
+            question: "Trong mô hình ra quyết định có sự hỗ trợ của AI, bước nào sau đây tuyệt đối KHÔNG được giao phó hoàn toàn cho máy móc?",
+            options: {
+                A: "Tổng hợp dữ liệu đầu vào.",
+                B: "Tìm kiếm thông tin trên internet.",
+                C: "Chốt quyết định cuối cùng và giải thích lí do.",
+                D: "Thống kê biểu đồ và xuất định dạng ảnh."
+            },
+            correct: "C",
+            explanation: "Bước 'Chốt quyết định và giải thích lí do' là ranh giới bất di bất dịch thuộc về con người, tuyệt đối không giao phó cho máy móc."
+        },
+        {
+            id: 10,
+            question: "Khi sử dụng Checklist (Bảng kiểm) để đánh giá trách nhiệm giải trình của một hệ thống AI, câu hỏi nào sau đây KHÔNG phù hợp?",
+            options: {
+                A: "Có con người đứng ra chịu trách nhiệm không?",
+                B: "Có bằng chứng cụ thể cho quyết định này không?",
+                C: "Có cơ chế để người dùng khiếu nại không?",
+                D: "AI có cảm thấy hối hận khi làm sai không?"
+            },
+            correct: "D",
+            explanation: "Checklist trách nhiệm gồm 3 yếu tố cốt lõi: Ai chịu trách nhiệm? Bằng chứng đâu? Có cơ chế khiếu nại không? AI không có cảm xúc hay tự chịu phạt."
+        },
+        {
+            id: 11,
+            question: "Một công ty phát hiện hệ thống AI tuyển dụng của họ luôn tự động đánh rớt hồ sơ của các ứng viên nữ, dù năng lực tương đương ứng viên nam. Hệ thống này đã vi phạm nguyên tắc đạo đức cơ bản nào?",
+            options: {
+                A: "Minh bạch hoạt động.",
+                B: "Tôn trọng quyền riêng tư.",
+                C: "Công bằng, tránh thiên vị và phân biệt đối xử.",
+                D: "Bảo vệ môi trường."
+            },
+            correct: "C",
+            explanation: "Hệ thống tự động loại bỏ hồ sơ nữ giới là ví dụ điển hình của việc vi phạm nguyên tắc công bằng (tránh thiên vị, phân biệt đối xử trong dữ liệu/kết quả)."
+        },
+        {
+            id: 12,
+            question: "Một hệ thống AI y tế đưa ra phác đồ điều trị nhưng nhà phát triển lại che giấu, không cho bác sĩ biết AI dựa trên cơ sở dữ liệu hay thuật toán nào để đưa ra kết quả đó. Nguyên tắc đạo đức nào đang bị vi phạm?",
+            options: {
+                A: "Minh bạch (công khai cách hoạt động, không che giấu thông tin).",
+                B: "Lợi ích xã hội (phát triển bền vững).",
+                C: "An toàn hệ thống.",
+                D: "Tôn trọng quyền tác giả."
+            },
+            correct: "A",
+            explanation: "Việc che giấu cách thức AI đưa ra kết quả vi phạm nguyên tắc 'Minh bạch - công khai cách hoạt động, không che giấu thông tin'."
+        },
+        {
+            id: 13,
+            question: "Để huấn luyện mô hình AI, một lập trình viên đã thu thập tin nhắn cá nhân và hình ảnh của người dùng trên mạng xã hội mà không xin phép. Hành động này vi phạm nguyên tắc nào?",
+            options: {
+                A: "Tôn trọng quyền riêng tư.",
+                B: "Trách nhiệm sản phẩm.",
+                C: "An toàn vật lý.",
+                D: "Tránh thiên lệch dữ liệu."
+            },
+            correct: "A",
+            explanation: "Việc thu thập dữ liệu cá nhân (tin nhắn, hình ảnh) mà không xin phép vi phạm nghiêm trọng nguyên tắc 'Tôn trọng quyền riêng tư'."
+        },
+        {
+            id: 14,
+            question: "Khi thiết kế một robot AI chăm sóc người già, nhà sản xuất phải đảm bảo nó tuyệt đối không gây chấn thương vật lý cho người dùng trong mọi tình huống. Đây là biểu hiện của nguyên tắc đạo đức nào?",
+            options: {
+                A: "Lợi ích cộng đồng.",
+                B: "An toàn (không gây nguy hiểm cho con người).",
+                C: "Tôn trọng bản quyền.",
+                D: "Minh bạch thuật toán."
+            },
+            correct: "B",
+            explanation: "Việc đảm bảo không gây chấn thương vật lý phản ánh nguyên tắc 'An toàn - không gây nguy hiểm cho con người và môi trường'."
+        },
+        {
+            id: 15,
+            question: "Nguyên tắc 'Lợi ích xã hội' trong phát triển AI đòi hỏi sản phẩm tạo ra phải hướng tới mục tiêu cốt lõi nào?",
+            options: {
+                A: "Tối đa hóa lợi nhuận cho nhà phát triển bằng mọi giá.",
+                B: "Phục vụ con người, cộng đồng và phát triển bền vững.",
+                C: "Thay thế hoàn toàn sức lao động của con người.",
+                D: "Cạnh tranh triệt tiêu các công nghệ cũ."
+            },
+            correct: "B",
+            explanation: "Nguyên tắc 'Lợi ích xã hội' quy định AI phải được thiết kế để phục vụ con người, cộng đồng và hướng tới sự phát triển bền vững."
+        },
+        {
+            id: 16,
+            question: "Theo kỉ luật học thuật, khi học sinh sử dụng ChatGPT hoặc các AI tương tự để tìm kiếm ý tưởng cho bài luận, hành động nào sau đây là ĐÚNG đắn nhất?",
+            options: {
+                A: "Chủ động khai báo rõ ràng việc có sử dụng công cụ AI để hỗ trợ ý tưởng.",
+                B: "Không nói cho ai biết để chứng tỏ mình giỏi.",
+                C: "Khẳng định toàn bộ ý tưởng trong bài là do mình tự nghĩ ra.",
+                D: "Xóa lịch sử trò chuyện với AI để giáo viên không phát hiện."
+            },
+            correct: "A",
+            explanation: "Kỉ luật học thuật yêu cầu tính 'Minh bạch', học sinh phải luôn chủ động khai báo (trích dẫn) công cụ AI nếu có sử dụng."
+        },
+        {
+            id: 17,
+            question: "Một học sinh yêu cầu AI viết trọn vẹn một bài văn nghị luận, sau đó copy nguyên bản 100% và nộp cho giáo viên. Hành vi này vi phạm nguyên tắc nào?",
+            options: {
+                A: "Bảo mật dữ liệu.",
+                B: "Tiết kiệm thời gian.",
+                C: "Tôn trọng bản quyền (sao chép nguyên bản và nhận là của mình).",
+                D: "Nguyên tắc an toàn vật lý."
+            },
+            correct: "C",
+            explanation: "Coi AI là trợ lý chứ không phải người làm hộ. Việc copy 100% sản phẩm của AI vi phạm nghiêm trọng kỉ luật 'Tôn trọng bản quyền' và tính trung thực."
+        },
+        {
+            id: 18,
+            question: "Tại sao học sinh tuyệt đối KHÔNG được đưa các thông tin cá nhân nhạy cảm (như số căn cước, mật khẩu, địa chỉ nhà) lên các công cụ AI công cộng?",
+            options: {
+                A: "Vì AI sẽ bị lỗi hiển thị.",
+                B: "Vì AI không hiểu được các con số.",
+                C: "Vì các dữ liệu này có thể bị hệ thống lưu trữ, chia sẻ trái phép và xâm phạm quyền riêng tư.",
+                D: "Vì AI sẽ tự động đổi mật khẩu của học sinh."
+            },
+            correct: "C",
+            explanation: "Để đảm bảo 'Bảo vệ dữ liệu', học sinh tuyệt đối không đưa thông tin cá nhân lên AI công cộng vì rủi ro rò rỉ và mất quyền riêng tư."
+        },
+        {
+            id: 19,
+            question: "Khi sử dụng các công cụ AI trong học tập, nguyên tắc 'vàng' về mặt nhận thức là gì?",
+            options: {
+                A: "Coi AI là người làm hộ bài tập hoàn hảo.",
+                B: "Coi AI là trợ lý hỗ trợ ý tưởng, bản thân học sinh vẫn phải là người ra quyết định.",
+                C: "Phó mặc hoàn toàn điểm số cho chất lượng của AI.",
+                D: "Sử dụng AI để làm bài thi trực tuyến thay mình."
+            },
+            correct: "B",
+            explanation: "Nguyên tắc đúng đắn: Học sinh làm chủ quá trình học, xem AI là trợ lý, không phó mặc việc học hay tư duy cho AI."
+        },
+        {
+            id: 20,
+            question: "Khi giáo viên giao bài tập thống kê điểm số lớp học, hành động nào sau đây của lớp trưởng là thiếu an toàn dữ liệu?",
+            options: {
+                A: "Tự lập bảng tính Excel offline trên máy tính cá nhân.",
+                B: "Dùng AI để gợi ý cách dùng hàm thống kê, sau đó tự làm.",
+                C: "Tải nguyên file điểm chứa đủ họ tên, ngày sinh và số điện thoại của cả lớp lên một web AI chưa được kiểm duyệt để nhờ tính toán.",
+                D: "Chủ động xin phép giáo viên về việc sử dụng công cụ thống kê an toàn."
+            },
+            correct: "C",
+            explanation: "Hành động tải bảng điểm chứa thông tin cá nhân/nhạy cảm chưa kiểm duyệt lên AI công cộng là hành vi vi phạm trực tiếp nguyên tắc bảo vệ dữ liệu."
+        }
+    ];
+
+    // 2. Render câu hỏi ra màn hình
+    const questionsContainer = document.getElementById('questions-container');
+
+    function renderQuiz() {
+        let htmlContent = '';
+        quizData.forEach((q, index) => {
+            htmlContent += `
+                <div class="question-card" id="question-${q.id}">
+                    <div class="question-title">Câu ${index + 1}: ${q.question}</div>
+                    <div class="options">
+                        <label class="option-label" id="label-${q.id}-A">
+                            <input type="radio" name="q${q.id}" value="A"> A. ${q.options.A}
+                        </label>
+                        <label class="option-label" id="label-${q.id}-B">
+                            <input type="radio" name="q${q.id}" value="B"> B. ${q.options.B}
+                        </label>
+                        <label class="option-label" id="label-${q.id}-C">
+                            <input type="radio" name="q${q.id}" value="C"> C. ${q.options.C}
+                        </label>
+                        <label class="option-label" id="label-${q.id}-D">
+                            <input type="radio" name="q${q.id}" value="D"> D. ${q.options.D}
+                        </label>
+                    </div>
+                    <div class="explanation-box" id="explanation-${q.id}">
+                        <strong>Giải thích:</strong> ${q.explanation}
+                    </div>
+                </div>
+            `;
+        });
+        questionsContainer.innerHTML = htmlContent;
+    }
+
+    // 3. Xử lý logic Nộp bài
+    function submitQuiz() {
+        // Lấy thông tin học sinh
+        const studentName = document.getElementById('student-name').value.trim();
+        const studentClass = document.getElementById('student-class').value.trim();
+
+        // Kiểm tra đã nhập thông tin chưa
+        if (!studentName || !studentClass) {
+            alert("Vui lòng nhập đầy đủ Họ tên và Lớp trước khi nộp bài!");
+            return;
+        }
+
+        let score = 0;
+        let isComplete = true;
+
+        // Kiểm tra xem đã chọn đủ chưa
+        quizData.forEach(q => {
+            const selectedOption = document.querySelector(`input[name="q${q.id}"]:checked`);
+            if (!selectedOption) {
+                isComplete = false;
+            }
+        });
+
+        if (!isComplete) {
+            alert("Vui lòng hoàn thành tất cả các câu hỏi trước khi nộp bài!");
+            return;
+        }
+
+        // Chấm điểm và đổi màu UI
+        quizData.forEach(q => {
+            const selectedOption = document.querySelector(`input[name="q${q.id}"]:checked`).value;
+            const correctOption = q.correct;
+
+            // Xóa hiệu ứng cũ nếu có
+            ['A', 'B', 'C', 'D'].forEach(opt => {
+                document.getElementById(`label-${q.id}-${opt}`).classList.remove('correct-answer', 'wrong-answer');
+            });
+
+            // Tô màu xanh cho đáp án đúng
+            document.getElementById(`label-${q.id}-${correctOption}`).classList.add('correct-answer');
+
+            if (selectedOption === correctOption) {
+                score++;
+            } else {
+                // Nếu chọn sai, tô màu đỏ cho đáp án đã chọn
+                document.getElementById(`label-${q.id}-${selectedOption}`).classList.add('wrong-answer');
+            }
+
+            // Hiện hộp giải thích
+            document.getElementById(`explanation-${q.id}`).style.display = 'block';
+            
+            // Khóa không cho sửa đáp án nữa
+            const radios = document.getElementsByName(`q${q.id}`);
+            radios.forEach(radio => radio.disabled = true);
+        });
+
+        // Ẩn nút nộp bài, hiện bảng kết quả
+        document.querySelector('.btn-submit').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        
+        // Render thông tin và điểm số
+        document.getElementById('score-display').innerHTML = `
+            <div class="student-result-name">Học sinh: <strong>${studentName}</strong> - Lớp: <strong>${studentClass}</strong></div>
+            <div class="score-number">KẾT QUẢ: ${score} / ${quizData.length} Câu Đúng</div>
+        `;
+        
+        // Cuộn lên đầu trang để xem kết quả
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Khởi tạo
+    renderQuiz();
+</script>
+
+</body>
+</html>
